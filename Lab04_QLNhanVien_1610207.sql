@@ -1,0 +1,8 @@
+CREATE DATABASE  Lab04_QLNhanVien_1610207
+GO
+USE Lab04_QLNhanVien_1610207
+GO
+CREATE TABLE ChiNhanh
+(MSCN char(2) primary key,
+TenCN NVARCHAR(30)
+)
