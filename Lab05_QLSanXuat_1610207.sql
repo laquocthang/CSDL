@@ -30,19 +30,19 @@ Ngay date not null,
 SoLuong tinyint not null,
 constraint PK Primary key (MACN, MASP, Ngay));
 
-Insert into ToSanXuat Values('TS01','Tổ 1')
-Insert into ToSanXuat Values('TS02','Tổ 2')
+Insert into ToSanXuat Values('TS01',N'Tổ 1')
+Insert into ToSanXuat Values('TS02',N'Tổ 2')
 
-Insert into CongNhan values('CN001','Nguyễn Trường','An','Nam','5/12/1981','TS01')
-Insert into CongNhan values('CN002','Lê Thị Hồng','Gấm','Nữ','6/4/1980','TS01')
-Insert into CongNhan values('CN003','Nguyễn Công','Thành','Nam','5/4/1981','TS02')
-Insert into CongNhan values('CN004','Võ Hữu','Hạnh','Nam','2/15/1980','TS02')
-Insert into CongNhan values('CN005','Lý Thanh','Hân','Nữ','12/3/1981','TS01')
+Insert into CongNhan values('CN001',N'Nguyễn Trường','An','Nam','5/12/1981','TS01')
+Insert into CongNhan values('CN002',N'Lê Thị Hồng',N'Gấm',N'Nữ','6/4/1980','TS01')
+Insert into CongNhan values('CN003',N'Nguyễn Công',N'Thành','Nam','5/4/1981','TS02')
+Insert into CongNhan values('CN004',N'Võ Hữu',N'Hạnh','Nam','2/15/1980','TS02')
+Insert into CongNhan values('CN005',N'Lý Thanh',N'Hân',N'Nữ','12/3/1981','TS01')
 
-Insert into SanPham Values('SP001','Nồi đất','cái','10000')
-Insert into SanPham Values('SP002','Chén','cái','2000')
-Insert into SanPham Values('SP003','Bình gốm nhỏ','cái','20000')
-Insert into SanPham Values('SP004','Bình gốm lớn','cái','25000')
+Insert into SanPham Values('SP001',N'Nồi đất',N'cái','10000')
+Insert into SanPham Values('SP002',N'Chén',N'cái','2000')
+Insert into SanPham Values('SP003',N'Bình gốm nhỏ',N'cái','20000')
+Insert into SanPham Values('SP004',N'Bình gốm lớn',N'cái','25000')
 
 Insert into ThanhPham Values('CN001','SP001','2/1/2007','10')
 Insert into ThanhPham Values('CN001','SP001','2/20/2007','30')

@@ -26,23 +26,23 @@ CREATE TABLE NhanVienKyNang
 MSKN nchar(2) foreign key references KyNang(MSKN),
 MucDo tinyint not null);
 
-insert into ChiNhanh values('01','Quận 1');
-insert into ChiNhanh values('02','Quận 5');
-insert into ChiNhanh values('03','Bình Thạnh');
+insert into ChiNhanh values('01',N'Quận 1');
+insert into ChiNhanh values('02',N'Quận 5');
+insert into ChiNhanh values('03',N'Bình Thạnh');
 
-Insert into KyNang Values('01','Word')
-Insert into KyNang Values('02','Excel')
-Insert into KyNang Values('03','Access')
-Insert into KyNang Values('04','Power Point')
-Insert into KyNang Values('05','SPSS')
+Insert into KyNang Values('01',N'Word')
+Insert into KyNang Values('02',N'Excel')
+Insert into KyNang Values('03',N'Access')
+Insert into KyNang Values('04',N'Power Point')
+Insert into KyNang Values('05',N'SPSS')
 
-Insert into NhanVien Values('0001','Lê Văn','Minh','6/10/1960','5/2/1986','01')
-Insert into NhanVien Values('0002','Nguyễn Thị','Mai','4/20/1970','7/4/2001','01')
-Insert into NhanVien Values('0003','Lê Anh','Tuấn','6/25/1975','9/1/1982','02')
-Insert into NhanVien Values('0004','Vương Tuấn','Vũ','3/25/1960','1/12/1986','02')
-Insert into NhanVien Values('0005','Lý Anh','Hân','12/1/1980','5/15/2004','02')
-Insert into NhanVien Values('0006','Phan Lê','Tuấn','6/4/1976','10/5/2002','03')
-Insert into NhanVien Values('0007','Lê Tuấn','Tú','8/15/1975','8/15/2000','03')
+Insert into NhanVien Values('0001',N'Lê Văn','Minh','6/10/1960','5/2/1986','01')
+Insert into NhanVien Values('0002',N'Nguyễn Thị','Mai','4/20/1970','7/4/2001','01')
+Insert into NhanVien Values('0003',N'Lê Anh',N'Tuấn','6/25/1975','9/1/1982','02')
+Insert into NhanVien Values('0004',N'Vương Tuấn',N'Vũ','3/25/1960','1/12/1986','02')
+Insert into NhanVien Values('0005',N'Lý Anh',N'Hân','12/1/1980','5/15/2004','02')
+Insert into NhanVien Values('0006',N'Phan Lê',N'Tuấn','6/4/1976','10/5/2002','03')
+Insert into NhanVien Values('0007',N'Lê Tuấn',N'Tú','8/15/1975','8/15/2000','03')
 
 Insert into NhanVienKyNang Values('0001','01','2')
 Insert into NhanVienKyNang Values('0001','02','1')
