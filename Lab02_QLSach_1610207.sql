@@ -1,4 +1,11 @@
-﻿Create database Lab02_QLSach_1610207
+﻿/* Môn: Cơ sở dữ liệu
+   Lab02_QLSach
+   Thực hiện: La Quốc Thắng
+   Ngày: 4/4/2018 
+*/
+---------------------------------------------------------------------------------------
+
+Create database Lab02_QLSach_1610207
 use Lab02_QLSach_1610207;
 
 go
@@ -67,3 +74,89 @@ from TacGia
 
 select *
 from Sach
+
+--Phan bai tap
+--Query 1: Cho biết số lượng cuốn sách theo từng thể loại (TenTL, TongSoLuong)
+select a.MaTL, b.TenTL, sum(a.SoLuong) as SoLuong
+from Sach a, TheLoai b
+where a.MaTL=b.MaTL
+group by a.MaTL,TenTL
+
+--Query 2: Hãy cho biết số cuốn sách mà mỗi nhà xuất bản đã xuất bản
+select b.MaNXB, b.TenNXB, sum(SOLUONG) as SoCuonSach
+from Sach a, NhaXuatBan b
+where a.MaNXB=b.MaNXB
+group by b.MaNXB, b.TenNXB
+
+--Query 3: Hãy cho biết số cuốn sách mà mỗi tác giả đã viết
+select a.MaTG, b.TenTG, count(a.MaTG) as SoCuonSach
+from Sach a, TacGia b
+where a.MaTG=b.MaTG
+group by a.MaTG, b.TenTG
+
+--Query 4: Cho biết số cuốn sách xuất bản theo từng năm
+select NamXB, sum(SoLuong)
+from Sach
+group by NamXB
+
+--Query 5: Cho biết số cuốn sách xuất bản năm 2005
+select NamXB, sum(SoLuong)
+from Sach
+where NamXB=2005
+group by NamXB
+
+--Query 6
+
+
+--Query 7: Hãy liệt kê thông tin về các cuốn sách đã được xuất bản
+select TenSach, TenTG, TenNXB, NamXB, SoLuong
+from Sach a, TacGia b, NhaXuatBan c
+where a.MaTG=b.MaTG and a.MaNXB=c.MaNXB
+
+--Query 8: Liệt kê các cuốn sách thuộc thể loại "Văn hóa - Du lịch" và "Ngoại ngữ"
+select TenSach, TenTG
+from Sach a, TacGia b, TheLoai c
+where a.MaTG=b.MaTG and a.MaTL=c.MaTL and c.TenTL like N'Văn hóa - Du lịch' union
+		(select TenSach, TenTG
+		from Sach a, TacGia b, TheLoai c
+		where a.MaTG=b.MaTG and a.MaTL=c.MaTL and c.TenTL like N'Ngoại ngữ')
+
+--Query 9: Cho biết các cuốn sách có số trang >400
+select TenSach, SoTrang
+from Sach
+where SoTrang>400
+
+--Query 10: Cho biết tên những nhà xuất bản không xuất bản sách thuộc thể loại "Tin học"
+select TenNXB, MaNXB
+from NhaXuatBan a
+where a.MaNXB not in (
+					select c.MaNXB
+					from TheLoai b, Sach c
+					where b.MaTL=c.MaTL and b.TenTL = N'Tin học')
+
+--Query 11: Cho biết họ tên tác giả  viết nhiều sách nhất
+select a.MaTG, b.TenTG
+from Sach a, TacGia b
+where a.MaTG=b.MaTG
+group by a.MaTG, b.TenTG
+having COUNT(a.MaSH)>=all(select COUNT(c.MaSH)
+						from Sach c
+						group by c.MaTG)
+						
+--Query 12: Cho biết tên thể loại có nhiều sách được xuất bản nhất
+select b.MaTL, b.TenTL, COUNT(a.MaSH) as SoLuong
+from Sach a, TheLoai b
+where a.MaTL=b.MaTL
+group by b.MaTL, b.TenTL
+having count(a.MaSH)>=all(select count(c.MaSH)
+						from  Sach c
+						group by c.MaTL)
+						
+--Query 13: Cho biết tên nhà xuất bản xuất bản ít sách nhất
+select b.MaNXB, b.TenNXB
+from Sach a, NhaXuatBan b
+where a.MaNXB=b.MaNXB
+group by b.MaNXB, b.TenNXB
+having count(a.MaSH)<all(select count(c.MaSH)
+						from Sach c
+						group by c.MaTL)

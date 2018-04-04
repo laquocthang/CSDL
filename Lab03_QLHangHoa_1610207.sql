@@ -1,4 +1,11 @@
-﻿Create database Lab03_QLHangHoa_1610207
+﻿/* Môn: Cơ sở dữ liệu
+   Lab03_QLHangHoa
+   Thực hiện: La Quốc Thắng
+   Ngày: 4/4/2018 
+*/
+---------------------------------------------------------------------------------------
+
+Create database Lab03_QLHangHoa_1610207
 use Lab03_QLHangHoa_1610207;
 
 go
@@ -78,3 +85,83 @@ from HoaDon
 
 select *
 from CT_HoaDon
+
+--Phan bai tap
+--Query 1: Tạo query hiển thị chi tiết thông tin về các mặt hàng đã được bán
+select a.NgayBan, a.SoHD, b.TenHH, c.SL_Ban, b.DonGia, round(c.SL_Ban*b.DonGia,2) as ThanhTien
+from HoaDon a, Hang_Hoa b, CT_HoaDon c
+where a.SoHD=c.SoHD and b.MaHH=c.MaHH
+
+--Query 2: tạo query đưa bảng tổng hợp tiền bán theo từng ngày của cửa hàng
+select a.NgayBan, sum(c.SL_Ban*b.DonGia) as TongTien
+from HoaDon a, Hang_Hoa b, CT_HoaDon c
+where a.SoHD=c.SoHD and b.MaHH=c.MaHH
+group by NgayBan
+
+--Query 3: Tạo query đưa ra bảng tổng hợp số lượng bán và tổng tiền đã bán ra  của từng loại mặt hàng
+select b.MaHH, sum(c.SL_Ban) as TongSoBan, sum(c.SL_Ban*b.DonGia) as TongTien 
+from HoaDon a, Hang_Hoa b, CT_HoaDon c
+where a.SoHD=c.SoHD and b.MaHH=c.MaHH
+group by b.MaHH, b.TenHH
+
+--Query 4: Tạo bảng tính tổng tiền từng hóa đơn bán hàng
+select d.SoHD, a.NgayBan, b.TenKH, sum(d.SL_Ban*c.DonGia) as TongTien
+from HoaDon a, Khach b, Hang_Hoa c, CT_HoaDon d
+where a.SoHD=d.SoHD and a.MaKH=b.MaKH and c.MaHH=d.MaHH
+group by d.SoHD, a.NgayBan, b.TenKH
+
+--Query 8: Cho biết tên những mặt hàng bán chạy nhất
+select b.MaHH, b.TenHH, SUM(a.SL_Ban) as SoLuong
+from CT_HoaDon a, Hang_Hoa b
+where a.MaHH=b.MaHH
+group by b.MaHH, b.TenHH
+having SUM(a.SL_Ban)>=all(select SUM(SL_Ban)
+						from CT_HoaDon c
+						group by c.MaHH)
+						
+--Query 9: Cho biết thông tin về các khách hàng mua nhiều mặt hàng nhất
+select c.MaKH, c.TenKH
+from CT_HoaDon a, HoaDon b, Khach c
+where a.SoHD=b.SoHD and b.MaKH=c.MaKH
+group by b.SoHD, c.MaKH, c.TenKH
+having SUM(a.SL_Ban)>=all(select SUM(d.SL_Ban)
+							from CT_HoaDon d
+							group by d.SoHD)
+							
+--Query 10: Cho biết thông tin của hóa đơn có tổng giá trị lớn nhất
+select b.SoHD, b.NgayBan, b.MaKH, SUM(SL_Ban*DonGia) as TongGiaTri
+from CT_HoaDon a, HoaDon b, Hang_Hoa c
+where a.SoHD=b.SoHD and c.MaHH=a.MaHH
+group by b.SoHD, b.NgayBan, b.MaKH
+having SUM(SL_Ban*DonGia)>=all(select SUM(d.SL_Ban*e.DonGia)
+								from CT_HoaDon d, Hang_Hoa e
+								where d.MaHH=e.MaHH
+								group by d.SoHD)
+								
+--Query 11:: Cho biết số lượng hóa đơn
+select SoHD, COUNT(SoHD)
+from CT_HoaDon
+group by SoHD
+
+--Query 12: Cho biết những mặt hàng chưa bán được
+select MaHH, TenHH
+from Hang_Hoa
+where MaHH not in(select a.MaHH
+					from CT_HoaDon a, Hang_Hoa b
+					where a.MaHH=b.MaHH
+					group by a.MaHH)
+
+--Query 13: Cho biết những hóa đơn có mua mặt hàng sơn
+select a.SoHD
+from CT_HoaDon a, Hang_Hoa b
+where a.MaHH=b.MaHH and TenHH like N'Sơn%'
+
+--Query 14: Cho biết số lượng khách hàng có mua "Sắt tròn"
+select count(a.SoHD) as SoLuong
+from CT_HoaDon a, Hang_Hoa b
+where a.MaHH=b.MaHH and TenHH=N'Sắt tròn'
+
+--Query 15: Tính tổng số tiền bán trong ngày 15/1/2006
+select sum(a.SL_Ban*b.DonGia) as TongSoTien
+from CT_HoaDon a, Hang_Hoa b, HoaDon c
+where a.MaHH =b.MaHH and c.SoHD=a.SoHD and NgayBan='1/15/2006'
