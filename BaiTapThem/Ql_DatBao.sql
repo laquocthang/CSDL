@@ -23,7 +23,7 @@ create table BAO_TCHI
 go
 create table PHATHANH_BAO
 (
-	MA_BAO_TC varchar(4),
+	MA_BAO_TC varchar(4) references BAO_TCHI(MA_BAO_TC),
 	SO_BAO_TC smallint,
 	NGAY_PH date not null,
 	primary key(MA_BAO_TC,SO_BAO_TC)

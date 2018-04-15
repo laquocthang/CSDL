@@ -302,7 +302,7 @@ having count(c.mado) >= all
 								where d.manb = e.manb and e.mapdk = f.mapdk and d.diachi like N'%quận 5'
 								group by f.mapdk
 							)
-------Câu 11:Chó biết những người bán có ít nhất một lần đăng ký trong đó đăng kí tất cả các dịch vụ hiện có 
+------Câu 11:Cho biết những người bán có ít nhất một lần đăng ký trong đó đăng kí tất cả các dịch vụ hiện có 
 select a.manb,hoten, diachi
 from nguoiban a
 where a.manb in(
