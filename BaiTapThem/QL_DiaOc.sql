@@ -206,7 +206,7 @@ select distinct n.MaNB, HoTen, DiaChi
 from NguoiBan n, PhieuDangKy p, CT_PDK c
 where n.MaNB=p.MaNB and p.MaPDK=c.MaPDK 
 group by n.MaNB, HoTen, DiaChi
-having count(MaDO)>=all (select COUNT(MaDO)
+having count(MaDO)>=all (select COUNT(distinct MaDO)
 	from CT_PDK
 	group by MaPDK)
 
@@ -257,7 +257,7 @@ having count(distinct c.MaDV) = (select count(madv)
 --Câu 13:Cho biết danh sách địa ốc đã được đăng kí quảng cáo với tất cả các dịch vụ có tiền dịch vụ nằm trong khoảng 100.000 tới 300.000
 select distinct d.MaDO, So, Duong, Phuong, Quan
 from DiaOc d, CT_PDK c, DichVu v
-where d.MaDO=c.MaDO and c.MaDV=v.MaDV and v.TenDV between 100000 and 300000
+where d.MaDO=c.MaDO and c.MaDV=v.MaDV and v.TienDV between 100000 and 300000
 group by d.MaDO, So, Duong, Phuong, Quan
 having count(distinct c.MaDV)=(select count(MaDV)
 	from DichVu
