@@ -35,7 +35,7 @@ create table Sach
     TacGia nvarchar(30) not null,
     SoLuong tinyint not null,
     NgayNhap date not null,
-    MaTL char(2) not null
+    MaTL char(2) references TheLoai(MaTL)
 )
 
 go
@@ -94,9 +94,6 @@ Insert into MuonSach Values('050002','TH0003','4/2/2007','4/15/2007')
 Insert into MuonSach Values('050002','TH0004','3/4/2007','')
 Insert into MuonSach Values('060002','TH0001','4/8/2007','')
 Insert into MuonSach Values('060002','TH0007','3/15/2007','4/15/2007')
-
-select *
-from NhaXuatBan
 
 select *
 from TheLoai

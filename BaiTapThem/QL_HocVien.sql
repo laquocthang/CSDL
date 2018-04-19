@@ -46,7 +46,7 @@ go
 drop table HocVien
 create table HocVien
 (
-    MSHV char(4) primary key,
+    MSHV varchar(6) primary key,
     Ho nvarchar(20) not null,
     Ten nvarchar(10) not null,
     NgaySinh date not null,
@@ -59,29 +59,33 @@ drop table HocPhi
 create table HocPhi
 (
     SoBL char(4) primary key,
-    MSHV char(6),
+    MSHV varchar(6) references HocVien(MSHV),
     NgayThu date not null,
     SoTien money,
     NoiDung varchar(30) not null,
     NguoiThu nvarchar(10) not null
 )
 
+delete from CaHoc
 insert into CaHoc values('1','7:30','10:45')
 insert into CaHoc values('2','13:30','16:45')
 insert into CaHoc values('3','17:30','20:45')
 
+delete from GiaoVien
 insert into GiaoVien values('G001',N'Lê Hoàng','Anh','858936')
 insert into GiaoVien values('G002',N'Nguyễn Ngọc',N'Lan','845623')
 insert into GiaoVien values('G003',N'Trần Minh',N'Hùng','823456')
 insert into GiaoVien values('G004',N'Võ Thanh',N'Trung','841256')
 
 set dateformat dmy
+delete from Lop
 insert into Lop values ('A075','Access 2-4-6','18/12/2008','150000','3','60','3','G003')
 insert into Lop values ('E114','Excel 3-5-7','02/01/2008','120000','1','45','3','G003')
 insert into Lop values ('E115','Excel 2-4-6','22/01/2008','120000','3','45','0','G001')
 insert into Lop values ('W123','Word 2-4-6','18/12/2008','100000','3','30','1','G001')
 insert into Lop values ('W124','Word 3-5-7','01/03/2008','100000','1','30','0','G002')
 
+delete from HocVien
 insert into HocVien values ('0001',N'Lê Văn','Minh','10/06/1998','1','A075')
 insert into HocVien values ('0002',N'Nguyễn Thị','Mai','20/04/1988','0','A075')
 insert into HocVien values ('0003',N'Lê Ngọc',N'Tuấn','10/06/1984','1','A075')
@@ -90,6 +94,7 @@ insert into HocVien values ('0005',N'Lý Ngọc',N'Hân','01/12/1985','0','E114'
 insert into HocVien values ('0006',N'Trần Mai','Linh','04/06/1980','0','E114')
 insert into HocVien values ('0007',N'Nguyễn Ngọc',N'Tuyết','12/05/1986','0','W123')
 
+delete from HocPhi
 insert into HocPhi values('0001','','16/12/2008','150000','HP Access 2-4-6','Lan')
 insert into HocPhi values('0002','','16/12/2008','100000','HP Access 2-4-6','Lan')
 insert into HocPhi values('0003','','18/12/2008','150000','HP Access 2-4-6','Van')
