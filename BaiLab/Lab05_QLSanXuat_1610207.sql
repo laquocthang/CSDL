@@ -1,7 +1,7 @@
 ﻿/* Môn: Cơ sở dữ liệu
    Lab05_QLSanXuat
    Thực hiện: La Quốc Thắng
-   Ngày: 4/4/2018 
+   Ngày: 20/4/2018 
 */
 ---------------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ create table CongNhan
 Ho nvarchar(20) not null,
 Ten nchar(10) not null,
 Phai nchar(3) not null,
-NgaySinh date not null,
+NgaySinh date,
 MaTSX nchar(4) references ToSanXuat(MaTSX));
 
 go
@@ -37,6 +37,30 @@ Ngay date not null,
 SoLuong tinyint not null,
 constraint PK Primary key (MACN, MASP, Ngay));
 
+
+---------------------------------------XÂY DỰNG THỦ TỤC NHẬP LIỆU------------------------------------
+
+create proc usp_ThemToSanXuat
+@MaTSX nchar(4), @TenTSX nchar(5)
+as
+Insert into ToSanXuat values (@MaTSX, @TenTSX)
+----------------------------------------------------
+create proc úp_ThemCongNhan
+@MaCN nchar(5), @Ho nvarchar(20), @Ten nchar(10), @Phai nchar(3), @NgaySinh date, @MaTSX nchar(4)
+as
+Insert into CongNhan values (@MaCN, @Ho, @Ten, @Phai, @NgaySinh, @MaTSX)
+----------------------------------------------------
+create proc usp_ThemSanPham
+@MaSP nchar(5), @TenSP nvarchar(20), @DVTinh nchar(3), @TienCong integer
+as
+Insert into SanPham values (@MaSP, @TenSP, @DVTinh, @TienCong)
+----------------------------------------------------
+create proc usp_ThemThanhPham
+@MaCN nchar(5), @MaSP nchar(5), @Ngay date, @SoLuong tinyint
+as
+Insert into ThanhPham values (@MaCN, @MaSP, @Ngay, @SoLuong)
+
+-----------------------------------------------------------------------------------------------------
 Insert into ToSanXuat Values('TS01',N'Tổ 1')
 Insert into ToSanXuat Values('TS02',N'Tổ 2')
 
@@ -46,6 +70,7 @@ Insert into CongNhan values('CN002',N'Lê Thị Hồng',N'Gấm',N'Nữ','6/4/19
 Insert into CongNhan values('CN003',N'Nguyễn Công',N'Thành','Nam','5/4/1981','TS02')
 Insert into CongNhan values('CN004',N'Võ Hữu',N'Hạnh','Nam','2/15/1980','TS02')
 Insert into CongNhan values('CN005',N'Lý Thanh',N'Hân',N'Nữ','12/3/1981','TS01')
+Insert into CongNhan values('CN006',N'Lê Thị','Lan',N'Nữ','','TS02')
 
 Insert into SanPham Values('SP001',N'Nồi đất',N'cái','10000')
 Insert into SanPham Values('SP002',N'Chén',N'cái','2000')
@@ -120,7 +145,7 @@ group by Ho, Ten, c.TenSP
 --Query 7:Tổng số tiền công đã trả cho công nhân trong tháng 1 năm 2006
 select sum(SoLuong*TienCong) as ThanhTien
 from ThanhPham a, SanPham b
-where b.MaSP=a.MaSP and month(a.Ngay)='1' and year(a.Ngay)='2007'
+where b.MaSP=a.MaSP and month(a.Ngay)=1 and year(a.Ngay)='2007'
 
 --Query 8:Cho biết sản phẩm sản xuất nhiều nhất trong tháng 2 năm 2007
 select TenSP
