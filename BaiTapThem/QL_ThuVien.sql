@@ -59,7 +59,25 @@ create table MuonSach
     CONSTRAINT PK Primary key(MaThe, MaSach, NgayMuon)
 )
 
---------------------------------XÂY DỰNG THỦ TỤC NHẬP LIỆU----------------------------------
+--------------------------------CÂU 2: XÂY DỰNG CÁC RÀNG BUỘC BẰNG TRIGGER----------------------------------
+
+--RB1: Số lượng sách >=0
+
+--RB2: Tên NXB là duy nhất
+
+--RB3: Tên thể loại là duy nhất
+
+--RB4: Mã thẻ gồm 6 ký tự theo quy tắc 2 chữ cuối của năm tạo thẻ + số thứ tự của thẻ trong năm đó
+
+--RB5: Mã sách gồm 6 ký tự theo quy tắc mã thể loại + số thứ tự của cuốn sách trong thể loại đó
+
+--RB6: Mỗi đọc giả không được giữ quá 3 quyển sách
+
+--RB7: Đọc giả không được phép mượn lại cuốn sách mà học đang nợ
+
+--RB8: Số lượng trong bảng sách sẽ được thay đổi tùy theo thao tác cho bạn đọc mượn, nhận trả sách hay nhập thêm sách
+
+--------------------------------CÂU 3: XÂY DỰNG THỦ TỤC THÊM, XÓA, SỬA----------------------------------
 
 create proc usp_ThemNhaXuatBan
 @MaNXB char(4), @TenNXB nvarchar(30)
@@ -100,9 +118,7 @@ if exists (select * from MuonSach where MaThe = @MaThe and MaSach = @MaSach and 
 	print N'Đã có dữ liệu mượn sách trong CSDL'
 else
 	insert into MuonSach values (@MaThe, @MaSach, @NgayMuon, @NgayTra)
-
---------------------------------XÂY DỰNG THỦ TỤC CẬP NHẬT----------------------------------
-
+----------------------------------------------------
 create proc usp_CapNhatNhaXuatBan
 @MaNXB char(4), @TenNXB nvarchar(30)
 as
@@ -148,9 +164,19 @@ as
 		where MaThe = @MaThe and MaSach = @MaSach and NgayMuon = @NgayMuon
 	end
 
---------------------------------XÂY DỰNG THỦ TỤC XOÁ---------------------------------
+------------------------------------------
+------------------------------------------
+------------------------------------------
 
+--------------------------------CÂU 4: VIẾT THỦ TỤC CẬP NHẬT SỐ LƯỢNG CUỐN SÁCH CÓ MÃ SỐ X TÙY THEO THAO TÁC CHO MƯỢN HOẶC NHẬN TRẢ SÁCH----------------------------------
 
+--------------------------------CÂU 5: VIẾT THỦ TỤC LẬP DANH SÁCH CÁC QUYỂN SÁCH THUỘC MỘT THỂ LOẠI CHO TRƯỚC----------------------------------
+
+--------------------------------CÂU 6: VIẾT THỦ TỤC LIỆT KÊ NHỮNG THÔNG TIN CỦA TẤT CẢ ĐỘC GIẢ ĐANG CÒN NỢ SÁCH----------------------------------
+
+--------------------------------CÂU 7: VIẾT THỦ TỤC LẬP DANH SÁCH DANH SÁCH MÀ MỘT ĐỘC GIẢ CHO TRƯỚC ĐÃ MƯỢN----------------------------------
+
+--------------------------------CÂU 8: VIẾT THỦ TỤC LẬP DANH SÁCH CÁC QUYỂN SÁCH CHƯA ĐƯỢC MƯỢN----------------------------------
 
 --------------------------------------------------------------------------------------------
 
