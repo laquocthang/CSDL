@@ -50,16 +50,14 @@ go
 --RB1: Công nhân phải đủ 18 tuổi khi vào làm
 drop trigger tg_CongNhanDu18Tuoi
 create trigger tg_CongNhanDu18Tuoi
-	on CongNhan for insert, update
-	as
-	if UPDATE(NgaySinh)
-		if exists (select *
-from inserted
-where DATEDIFF(year, NgaySinh, GETDATE()) < 18)
-			begin
-	raiserror (N'Công nhân phải đủ 18 tuổi thì mới vào làm',15,1)
-	rollback tran
-end
+on CongNhan for insert, update
+as
+if UPDATE(NgaySinh)
+	if exists (select * from inserted where DATEDIFF(year, NgaySinh, GETDATE()) < 18)
+		begin
+			raiserror (N'Công nhân phải đủ 18 tuổi thì mới vào làm',15,1)
+			rollback tran
+		end
 
 /*Kiểm tra
 exec usp_ThemCongNhan 'CN006',N'Lê Thị','Lan',N'Nữ','1/1/2002','TS02'
@@ -67,7 +65,7 @@ exec usp_ThemCongNhan 'CN006',N'Lê Thị','Lan',N'Nữ','1/1/2002','TS02'
 go
 
 --RB2: Tên tổ sản xuất phải phân biệt
-alter table ToSanXuat add
+	alter table ToSanXuat add
 	constraint TSX_PhanBiet unique (TenTSX)
 
 /*Kiểm tra
@@ -76,7 +74,7 @@ exec usp_ThemToSanXuat 'TS03',N'Tổ 1'
 go
 
 --RB3: Tên sản phẩm phải khác nhau
-alter table SanPham add
+	alter table SanPham add
 	constraint TenSP_PhanBiet unique (TenSP)
 
 /*Kiểm tra
@@ -86,16 +84,14 @@ go
 
 --RB4: Tiền công > 0, số lượng phải > 0
 create trigger tg_TienCongDuong
-	on SanPham for insert, update
-	as
-	if update(TienCong)
-		if exists (select *
-from inserted
-where TienCong <= 0)
-			begin
-	raiserror (N'Tiền công phải lớn hơn không',15,1)
-	rollback tran
-end
+on SanPham for insert, update
+as
+if update(TienCong)
+	if exists (select * from inserted where TienCong <= 0)
+		begin
+			raiserror (N'Tiền công phải lớn hơn không',15,1)
+			rollback tran
+		end
 
 /*Kiểm tra
 update SanPham
@@ -105,16 +101,14 @@ where MaSP = 'SP001'
 go
 
 create trigger tg_SoLuongDuong
-	on ThanhPham for insert, update
-	as
-	if update (SoLuong)
-		if exists (select *
-from inserted
-where SoLuong <= 0)
-			begin
-	raiserror (N'Số lượng phải lớn hơn không',15,1)
-	rollback tran
-end
+on ThanhPham for insert, update
+as
+if update (SoLuong)
+	if exists (select *	from inserted where SoLuong <= 0)
+		begin
+			raiserror (N'Số lượng phải lớn hơn không',15,1)
+			rollback tran
+		end
 
 /*Kiểm tra
 update ThanhPham
@@ -125,16 +119,14 @@ go
 
 --RB5: Ngày sản xuất thành phẩm phải thuộc năm hiện hành và không được lớn hơn ngày hiện tại
 create trigger tg_NgaySXThanhPham
-	on ThanhPham for insert, update
-	as
-	if update (Ngay)
-		if exists (select *
-from inserted
-where year(Ngay) <> year(GETDATE()) and GETDATE() < Ngay)
-			begin
-	raiserror (N'Ngày sản xuất thành phẩm phải thuộc năm hiện hành và không được lớn hơn ngày hiện tại',15,1)
-	rollback tran
-end
+on ThanhPham for insert, update
+as
+if update (Ngay)
+	if exists (select * from inserted where year(Ngay) <> year(GETDATE()) and GETDATE() < Ngay)
+		begin
+			raiserror (N'Ngày sản xuất thành phẩm phải thuộc năm hiện hành và không được lớn hơn ngày hiện tại',15,1)
+			rollback tran
+		end
 go
 
 ---------------------------------------CÂU 3: XÂY DỰNG THỦ TỤC NHẬP LIỆU------------------------------------
@@ -143,14 +135,10 @@ create proc usp_ThemToSanXuat
 	@MaTSX nchar(4),
 	@TenTSX nchar(5)
 as
-if exists (select *
-from ToSanXuat
-where MaTSX = @MaTSX)
+if exists (select * from ToSanXuat where MaTSX = @MaTSX)
 	print N'Đã tồn tại tổ sản xuất này trong CSDL'
 else
-	Insert into ToSanXuat
-values
-	(@MaTSX, @TenTSX)
+	Insert into ToSanXuat values (@MaTSX, @TenTSX)
 go
 ----------------------------------------------------
 create proc usp_ThemCongNhan
@@ -161,14 +149,10 @@ create proc usp_ThemCongNhan
 	@NgaySinh date,
 	@MaTSX nchar(4)
 as
-if exists (select *
-from CongNhan
-where MaCN = @MaCN)
+if exists (select * from CongNhan where MaCN = @MaCN)
 	print N'Đã tồn tại công nhân này trong CSDL'
 else
-	Insert into CongNhan
-values
-	(@MaCN, @Ho, @Ten, @Phai, @NgaySinh, @MaTSX)
+	Insert into CongNhan values (@MaCN, @Ho, @Ten, @Phai, @NgaySinh, @MaTSX)
 go
 ----------------------------------------------------
 create proc usp_ThemSanPham
@@ -177,14 +161,10 @@ create proc usp_ThemSanPham
 	@DVTinh nchar(3),
 	@TienCong integer
 as
-if exists (select *
-from SanPham
-where MaSP = @MaSP)
+if exists (select * from SanPham where MaSP = @MaSP)
 	print N'Đã tồn tại sản phẩm này trong CSDL'
 else
-	Insert into SanPham
-values
-	(@MaSP, @TenSP, @DVTinh, @TienCong)
+	Insert into SanPham values (@MaSP, @TenSP, @DVTinh, @TienCong)
 go
 ----------------------------------------------------
 create proc usp_ThemThanhPham
@@ -193,25 +173,19 @@ create proc usp_ThemThanhPham
 	@Ngay date,
 	@SoLuong tinyint
 as
-if exists (select *
-from ThanhPham
-where MaCN = @MaCN and MaSP = @MaSP and Ngay = @Ngay)
+if exists (select * from ThanhPham where MaCN = @MaCN and MaSP = @MaSP and Ngay = @Ngay)
 	print N'Đã tồn tại thành phẩm này trong CSDL'
 else
-	Insert into ThanhPham
-values
-	(@MaCN, @MaSP, @Ngay, @SoLuong)
+	Insert into ThanhPham values (@MaCN, @MaSP, @Ngay, @SoLuong)
 go
 --Tạo thủ tục tính tiền công hàng tháng cho công nhân với tháng cần tính tiền là tham số input
 create proc tg_TinhTienCong
 	@Thang tinyint
 as
-begin
 	select c.MaCN, Ho, Ten, Phai, NgaySinh, MaTSX, sum(SoLuong * TienCong) as TienCong
 	from SanPham s, ThanhPham t, CongNhan c
 	where s.MaSP = t.MaSP and c.MaCN = t.MaCN and month(Ngay) = @Thang
 	group by c.MaCN, Ho, Ten, Phai, NgaySinh, MaTSX
-end
 
 /*Kiểm tra
 exec tg_TinhTienCong 2

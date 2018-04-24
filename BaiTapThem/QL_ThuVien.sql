@@ -67,13 +67,11 @@ create trigger tg_SoLuongSach
 	on Sach for insert, update
 	as
 	if update(SoLuong)
-		if exists(select *
-from inserted
-where SoLuong < 0)
+		if exists(select * from inserted where SoLuong < 0)
 			begin
-	raiserror (N'Số lượng sách phải >= 0',15,1)
-	rollback tran
-end
+				raiserror (N'Số lượng sách phải >= 0',15,1)
+				rollback tran
+			end
 
 /*Kiểm tra
 exec usp_ThemSach 'TH0008',N'Giáo trình Access 2000','N001',N'Thiện Tâm','-1','12/11/2005','TH'
@@ -81,7 +79,7 @@ exec usp_ThemSach 'TH0008',N'Giáo trình Access 2000','N001',N'Thiện Tâm','-
 go
 
 --RB2: Tên NXB là duy nhất
-alter table NhaXuatBan add
+	alter table NhaXuatBan add
 	constraint TenNXBDuyNhat unique (TenNXB)
 
 /*Kiểm tra
@@ -89,9 +87,8 @@ insert into NhaXuatBan values ('N004',N'Thống kê')
 */
 go
 
-
 --RB3: Tên thể loại là duy nhất
-alter table TheLoai add
+	alter table TheLoai add
 	constraint TenTLDuyNhat unique (TenTL)
 
 /*Kiểm tra
@@ -105,21 +102,19 @@ drop function dbo.fn_SinhMaThe
 create function fn_SinhMaThe() returns char(6)
 	as
 		begin
-	declare @NamHienTai char(4)
-	declare @stt int
-	declare @MaThe char(6)
-	set @stt = 0
-	set @NamHienTai = CONVERT(char(4),YEAR(GETDATE()))
-	if exists (select *
-	from BanDoc
-	where left(MaThe,2) = right(@NamHienTai,2))
+			declare @NamHienTai char(4)
+			declare @stt int
+			declare @MaThe char(6)
+			set @stt = 0
+			set @NamHienTai = CONVERT(char(4),YEAR(GETDATE()))
+			if exists (select * from BanDoc where left(MaThe,2) = right(@NamHienTai,2))
 				set @stt = (select convert(int,right(max(MaThe),4))
-	from BanDoc
-	where left(MaThe,2) = right(@NamHienTai,2))
-	set @stt = @stt + 1
-	set @MaThe = right('00'+cast(right(@NamHienTai,2) as varchar(2)),2) + right('0000'+cast(@stt as varchar(4)),4)
-	return @MaThe
-end
+				from BanDoc
+				where left(MaThe,2) = right(@NamHienTai,2))
+			set @stt = @stt + 1
+			set @MaThe = right('00'+cast(right(@NamHienTai,2) as varchar(2)),2) + right('0000'+cast(@stt as varchar(4)),4)
+			return @MaThe
+		end
 
 /*Kiểm tra
 print dbo.fn_SinhMaThe()
@@ -132,19 +127,17 @@ drop function fn_SinhMaSach
 create function fn_SinhMaSach(@MaTL char(2)) returns char(6)
 	as
 		begin
-	declare @stt int
-	declare @MaSach char (6)
-	set @stt=0
-	if exists (select *
-	from Sach
-	where MaTL = @MaTL)
+			declare @stt int
+			declare @MaSach char (6)
+			set @stt=0
+			if exists (select * from Sach where MaTL = @MaTL)
 				set @stt = (select convert(int,right(max(MaSach),4))
-	from Sach
-	where MaTL = @MaTL)
-	set @stt = @stt + 1
-	set @MaSach = @MaTL + right('0000'+cast(@stt as varchar(4)),4)
-	return @MaSach
-end
+				from Sach
+				where MaTL = @MaTL)
+			set @stt = @stt + 1
+			set @MaSach = @MaTL + right('0000'+cast(@stt as varchar(4)),4)
+			return @MaSach
+		end
 
 /*Kiểm tra
 print dbo.fn_SinhMaSach('TH')
@@ -159,27 +152,25 @@ create trigger tg_KhongGiuQua3CuonSach
 	as
 	if update(MaSach)
 		begin
-	declare cur_ThemMuonSach cursor local
+			declare cur_ThemMuonSach cursor local
 			for select MaThe
-	from inserted
-	open cur_ThemMuonSach
-	declare @MaThe char(6), @SoLuong tinyint
-	fetch next from cur_ThemMuonSach into @MaThe
-	while @@FETCH_STATUS = 0
+			from inserted
+			open cur_ThemMuonSach
+			declare @MaThe char(6), @SoLuong tinyint
+			fetch next from cur_ThemMuonSach into @MaThe
+			while @@FETCH_STATUS = 0
 				begin
-		set @SoLuong = (select count(MaSach)
-		from MuonSach
-		where NgayTra = '' and MaThe = @MaThe)
-		if @SoLuong > 3
+					set @SoLuong = (select count(MaSach) from MuonSach where NgayTra = '' and MaThe = @MaThe)
+					if @SoLuong > 3
 						begin
-			raiserror (N'Mỗi bạn đọc chỉ giữ từ 3 cuốn sách trở xuống',15,1)
-			rollback tran
+							raiserror (N'Mỗi bạn đọc chỉ giữ từ 3 cuốn sách trở xuống',15,1)
+							rollback tran
+						end
+					fetch next from cur_ThemMuonSach into @MaThe
+				end
+			close cur_ThemMuonSach
+			deallocate cur_ThemMuonSach
 		end
-		fetch next from cur_ThemMuonSach into @MaThe
-	end
-	close cur_ThemMuonSach
-	deallocate cur_ThemMuonSach
-end
 
 /*Kiểm tra
 delete from MuonSach
@@ -197,27 +188,25 @@ create trigger tg_KhongDuocMuonLai
 	as
 	if update(MaSach)
 		begin
-	declare cur_ThemMuonSach cursor local
+			declare cur_ThemMuonSach cursor local
 			for select MaThe, MaSach
-	from inserted
-	open cur_ThemMuonSach
-	declare @MaThe char(6), @MaSach char(6), @soLuong tinyint
-	fetch next from cur_ThemMuonSach into @MaThe, @MaSach
-	while @@FETCH_STATUS = 0
+			from inserted
+			open cur_ThemMuonSach
+			declare @MaThe char(6), @MaSach char(6), @soLuong tinyint
+			fetch next from cur_ThemMuonSach into @MaThe, @MaSach
+			while @@FETCH_STATUS = 0
 				begin
-		set @soLuong = (select count(MaSach)
-		from MuonSach
-		where MaThe = @MaThe and MaSach = @MaSach)
-		if @soLuong>=2
+					set @soLuong = (select count(MaSach) from MuonSach where MaThe = @MaThe and MaSach = @MaSach)
+					if @soLuong>=2
 						begin
-			raiserror (N'Không được mượn lại cuốn sách đã nợ',15,1)
-			rollback tran
+							raiserror (N'Không được mượn lại cuốn sách đã nợ',15,1)
+							rollback tran
+						end
+					fetch next from cur_ThemMuonSach into @MaThe, @MaSach
+				end
+			close cur_ThemMuonSach
+			deallocate cur_ThemMuonSach
 		end
-		fetch next from cur_ThemMuonSach into @MaThe, @MaSach
-	end
-	close cur_ThemMuonSach
-	deallocate cur_ThemMuonSach
-end
 go
 
 --RB8: Số lượng trong bảng sách sẽ được thay đổi tùy theo thao tác cho bạn đọc mượn, nhận trả sách hay nhập thêm sách
@@ -227,31 +216,31 @@ create trigger tg_CapNhatSoLuongSach
 	as
 	if update(MaSach) or update(NgayMuon) or update(NgayTra)
 		begin
-	declare cur_ThemMuonSach cursor local
+			declare cur_ThemMuonSach cursor local
 			for select MaSach, NgayMuon, NgayTra
-	from inserted
-	open cur_ThemMuonSach
-	declare @MaSach char(6), @NgayMuon datetime, @NgayTra datetime
-	fetch next from cur_ThemMuonSach into @MaSach, @NgayMuon, @NgayTra
-	while @@fetch_status = 0
+			from inserted
+			open cur_ThemMuonSach
+			declare @MaSach char(6), @NgayMuon datetime, @NgayTra datetime
+			fetch next from cur_ThemMuonSach into @MaSach, @NgayMuon, @NgayTra
+			while @@fetch_status = 0
 				begin
-		if @NgayMuon <> ''
+					if @NgayMuon <> ''
 						begin
-			update Sach
+							update Sach
 							set SoLuong = SoLuong - 1
 							where MaSach = @MaSach
-		end
-		if @NgayTra <> ''
+						end
+					if @NgayTra <> ''
 						begin
-			update Sach
+							update Sach
 							set SoLuong = SoLuong + 1
 							where MaSach = @MaSach
-		end
-		fetch next from cur_ThemMuonSach into @MaSach, @NgayMuon, @NgayTra
-	end
-	close cur_ThemMuonSach
-	deallocate cur_ThemMuonSach
-end		
+						end
+					fetch next from cur_ThemMuonSach into @MaSach, @NgayMuon, @NgayTra
+				end
+			close cur_ThemMuonSach
+			deallocate cur_ThemMuonSach
+		end		
 go
 
 --Cách 2 (Sử dụng thủ tục Cập nhật sách 2)
@@ -260,23 +249,23 @@ create trigger tg_CapNhatSoLuongSach_2
 	as
 	if update(MaSach) or update(NgayMuon) or update(NgayTra)
 		begin
-	declare cur_ThemMuonSach cursor local
+			declare cur_ThemMuonSach cursor local
 			for select MaSach, NgayMuon, NgayTra
-	from inserted
-	open cur_ThemMuonSach
-	declare @MaSach char(6), @NgayMuon datetime, @NgayTra datetime
-	fetch next from cur_ThemMuonSach into @MaSach, @NgayMuon, @NgayTra
-	while @@fetch_status = 0
+			from inserted
+			open cur_ThemMuonSach
+			declare @MaSach char(6), @NgayMuon datetime, @NgayTra datetime
+			fetch next from cur_ThemMuonSach into @MaSach, @NgayMuon, @NgayTra
+			while @@fetch_status = 0
 				begin
-		if @NgayMuon <> ''
+					if @NgayMuon <> ''
 						exec usp_CapNhatSach_2 @MaSach,1
-		if @NgayTra <> ''
-						exec usp_CapNhatSach_2 @MaSach,2
-		fetch next from cur_ThemMuonSach into @MaSach, @NgayMuon, @NgayTra
-	end
-	close cur_ThemMuonSach
-	deallocate cur_ThemMuonSach
-end		
+					if @NgayTra <> ''
+							exec usp_CapNhatSach_2 @MaSach,2
+					fetch next from cur_ThemMuonSach into @MaSach, @NgayMuon, @NgayTra
+				end
+			close cur_ThemMuonSach
+			deallocate cur_ThemMuonSach
+		end		
 
 /*Kiểm tra
 insert into MuonSach values ('060001','TH0001','4/8/2007','')
@@ -290,28 +279,20 @@ create proc usp_ThemNhaXuatBan
 	@MaNXB char(4),
 	@TenNXB nvarchar(30)
 as
-if exists (select *
-from NhaXuatBan
-where MaNXB = @MaNXB)
+if exists (select * from NhaXuatBan where MaNXB = @MaNXB)
 	print N'Đã có mã nhà xuất bản trong CSDL'
 else
-	insert into NhaXuatBan
-values
-	(@MaNXB, @TenNXB)
+	insert into NhaXuatBan values (@MaNXB, @TenNXB)
 go
 ----------------------------------------------------
 create proc usp_ThemTheLoai
 	@MaTL char(2),
 	@TenTL nvarchar(30)
 as
-if exists (select *
-from TheLoai
-where MaTL = @MaTL)
+if exists (select * from TheLoai where MaTL = @MaTL)
 	print N'Đã có mã thể loại trong CSDL'
 else
-	insert into TheLoai
-values
-	(@MaTL, @TenTL)
+	insert into TheLoai values (@MaTL, @TenTL)
 go
 ----------------------------------------------------
 create proc usp_ThemSach
@@ -323,14 +304,10 @@ create proc usp_ThemSach
 	@NgayNhap datetime,
 	@MaTL char(2)
 as
-if exists (select *
-from Sach
-where MaSach = @MaSach)
+if exists (select * from Sach where MaSach = @MaSach)
 	print N'Đã có mã sách trong CSDL'
 else
-	insert into Sach
-values
-	(@MaSach, @TuaDe, @MaNXB, @TacGia, @SoLuong, @NgayNhap, @MaTL)
+	insert into Sach values (@MaSach, @TuaDe, @MaNXB, @TacGia, @SoLuong, @NgayNhap, @MaTL)
 go
 --Cách 2:
 create proc usp_ThemSach_2
@@ -344,9 +321,7 @@ as
 begin
 	declare @MaSach char(6)
 	set @MaSach = dbo.fn_SinhMaSach(@MaTL)
-	insert into Sach
-	values
-		(@MaSach, @TuaDe, @MaNXB, @TacGia, @SoLuong, @NgayNhap, @MaTL)
+	insert into Sach values (@MaSach, @TuaDe, @MaNXB, @TacGia, @SoLuong, @NgayNhap, @MaTL)
 end
 go
 ----------------------------------------------------
@@ -356,14 +331,10 @@ create proc usp_ThemBanDoc
 	@DiaChi nvarchar(50),
 	@SoDT varchar(11)
 as
-if exists (select *
-from BanDoc
-where MaThe = @MaThe)
+if exists (select * from BanDoc where MaThe = @MaThe)
 	print N'Đã có mã bạn đọc trong CSDL'
 else
-	insert into BanDoc
-values
-	(@MaThe, @TenBanDoc, @DiaChi, @SoDT)
+	insert into BanDoc values (@MaThe, @TenBanDoc, @DiaChi, @SoDT)
 go
 --Cách 2:
 create proc usp_ThemBanDoc_2
@@ -371,13 +342,11 @@ create proc usp_ThemBanDoc_2
 	@DiaChi nvarchar(50),
 	@SoDT varchar(11)
 as
-begin
-	declare @MaThe char(6)
-	set @MaThe = dbo.fn_SinhMaThe()
-	insert into BanDoc
-	values
-		(@MaThe, @TenBanDoc, @DiaChi, @SoDT)
-end
+	begin
+		declare @MaThe char(6)
+		set @MaThe = dbo.fn_SinhMaThe()
+		insert into BanDoc values (@MaThe, @TenBanDoc, @DiaChi, @SoDT)
+	end
 go
 ----------------------------------------------------
 create proc usp_ThemMuonSach
@@ -386,14 +355,10 @@ create proc usp_ThemMuonSach
 	@NgayMuon datetime,
 	@NgayTra datetime
 as
-if exists (select *
-from MuonSach
-where MaThe = @MaThe and MaSach = @MaSach and NgayMuon = @NgayMuon)
+if exists (select * from MuonSach where MaThe = @MaThe and MaSach = @MaSach and NgayMuon = @NgayMuon)
 	print N'Đã có dữ liệu mượn sách trong CSDL'
 else
-	insert into MuonSach
-values
-	(@MaThe, @MaSach, @NgayMuon, @NgayTra)
+	insert into MuonSach values (@MaThe, @MaSach, @NgayMuon, @NgayTra)
 go
 
 --==============CẬP NHẬT=================
@@ -401,22 +366,22 @@ create proc usp_CapNhatNhaXuatBan
 	@MaNXB char(4),
 	@TenNXB nvarchar(30)
 as
-begin
-	update NhaXuatBan
+	begin
+		update NhaXuatBan
 		set TenNXB=@TenNXB
 		where MaNXB=@MaNXB
-end
+	end
 go
 ------------------------------------------
 create proc usp_CapNhatTheLoai
 	@MaTL char(2),
 	@TenTL nvarchar(30)
 as
-begin
-	update TheLoai
+	begin
+		update TheLoai
 		set TenTL=@TenTL
 		where MaTL=@MaTL
-end
+	end
 go
 ------------------------------------------
 create proc usp_CapNhatSach
@@ -428,11 +393,11 @@ create proc usp_CapNhatSach
 	@NgayNhap datetime,
 	@MaTL char(2)
 as
-begin
-	update Sach
+	begin
+		update Sach
 		set TuaDe=@TuaDe, MaNXB=@MaNXB, TacGia=@TacGia, SoLuong=@SoLuong, NgayNhap=@NgayNhap, MaTL=@MaTL
 		where MaSach=@MaSach
-end
+	end
 go
 ------------------------------------------
 create proc usp_CapNhatBanDoc
@@ -441,11 +406,11 @@ create proc usp_CapNhatBanDoc
 	@DiaChi nvarchar(50),
 	@SoDT varchar(11)
 as
-begin
-	update BanDoc
+	begin
+		update BanDoc
 		set TenBanDoc=@TenBanDoc, DiaChi=@DiaChi, SoDT=@SoDT
 		where MaThe=@MaThe
-end
+	end
 go
 ------------------------------------------
 create proc usp_CapNhatMuonSach
@@ -454,26 +419,24 @@ create proc usp_CapNhatMuonSach
 	@NgayMuon datetime,
 	@NgayTra datetime
 as
-begin
-	update MuonSach
+	begin
+		update MuonSach
 		set NgayTra=@NgayTra
 		where MaThe = @MaThe and MaSach = @MaSach and NgayMuon = @NgayMuon
-end
+	end
 go
 
 --==============XÓA=================
 create proc usp_XoaNXB
 	@MaNXB char(4)
 as
-if exists(select *
-from Sach
-where @MaNXB = MaNXB)
+if exists(select * from Sach where @MaNXB = MaNXB)
 	print N'Không thể xóa vì đã có tham chiếu'
 else
 	begin
-	delete from NhaXuatBan
+		delete from NhaXuatBan
 		where MaNXB = @MaNXB
-end
+	end
 
 /*Kiểm tra
 exec usp_XoaNXB 'N001'
@@ -483,15 +446,13 @@ go
 create proc usp_XoaTheLoai
 	@MaTL char(2)
 as
-if exists(select *
-from Sach
-where @MaTL = MaTL)
+if exists(select * from Sach where @MaTL = MaTL)
 	print N'Không thể xóa vì đã có tham chiếu'
 else
 	begin
-	delete from TheLoai
+		delete from TheLoai
 		where MaTL = @MaTL
-end
+	end
 
 /*Kiểm tra
 exec usp_XoaNXB 'N001'
@@ -501,15 +462,13 @@ go
 create proc usp_XoaBanDoc
 	@MaThe char(6)
 as
-if exists (select *
-from MuonSach
-where @MaThe = MaThe)
+if exists (select * from MuonSach where @MaThe = MaThe)
 	print N'Không thể xóa vì đã có tham chiếu'
 else
 	begin
-	delete from BanDoc
+		delete from BanDoc
 		where MaThe = @MaThe
-end
+	end
 
 /*Kiểm tra
 exec usp_XoaBanDoc '050001'
@@ -519,15 +478,13 @@ go
 create proc usp_XoaSach
 	@MaSach char(6)
 as
-if exists (select *
-from MuonSach
-where @MaSach = MaSach)
+if exists (select * from MuonSach where @MaSach = MaSach)
 	print N'Không thể xóa vì đã có tham chiếu'
 else
 	begin
-	delete from Sach
+		delete from Sach
 		where MaSach = @MaSach
-end
+	end
 
 /*Kiểm tra
 exec usp_XoaSach 'TH0001'
@@ -539,10 +496,10 @@ create proc usp_XoaMuonSach
 	@MaSach char(6),
 	@NgayMuon datetime
 as
-begin
-	delete from MuonSach
+	begin
+		delete from MuonSach
 		where MaSach = @MaSach and MaThe = @MaThe and NgayMuon = @NgayMuon
-end
+	end
 go
 
 --------------------------------CÂU 4: VIẾT THỦ TỤC CẬP NHẬT SỐ LƯỢNG CUỐN SÁCH CÓ MÃ SỐ X TÙY THEO THAO TÁC CHO MƯỢN HOẶC NHẬN TRẢ SÁCH----------------------------------
@@ -551,33 +508,33 @@ create proc usp_CapNhatSach_2
 	@MaSach char(6),
 	@ThaoTac tinyint
 as
-begin
-	declare cur_CapNhatSach cursor local
+	begin
+		declare cur_CapNhatSach cursor local
 		for select MaSach
-	from Sach
-	open cur_CapNhatSach
-	declare @MaSH char(6)
-	fetch next from cur_CapNhatSach into @MaSH
-	while @@FETCH_STATUS = 0
+		from Sach
+		open cur_CapNhatSach
+		declare @MaSH char(6)
+		fetch next from cur_CapNhatSach into @MaSH
+		while @@FETCH_STATUS = 0
 			begin
-		if @MaSH = @MaSach
+				if @MaSH = @MaSach
 					if @ThaoTac = 1
 						begin
-			update Sach
+							update Sach
 							set SoLuong = SoLuong - 1
 							where @MaSach = MaSach
-		end
+						end
 					else
 						begin
-			update Sach
+							update Sach
 							set SoLuong = SoLuong + 1
 							where @MaSach = MaSach
-		end
-		fetch next from cur_CapNhatSach into @MaSH
+						end
+				fetch next from cur_CapNhatSach into @MaSH
+			end
+		close cur_CapNhatSach
+		deallocate cur_CapNhatSach
 	end
-	close cur_CapNhatSach
-	deallocate cur_CapNhatSach
-end
 
 /*Kiểm tra
 exec usp_CapNhatSach_2 'TH0001',2
@@ -588,9 +545,7 @@ go
 create proc usp_LietKeSach_TheLoai
 	@MaTL char(2)
 as
-select *
-from Sach
-where MaTL = @MaTL
+select * from Sach where MaTL = @MaTL
 
 /*Kiểm tra
 exec usp_LietKeSach_TheLoai 'TH'
@@ -600,11 +555,7 @@ go
 --------------------------------CÂU 6: VIẾT THỦ TỤC LIỆT KÊ NHỮNG THÔNG TIN CỦA TẤT CẢ ĐỘC GIẢ ĐANG CÒN NỢ SÁCH----------------------------------
 create proc usp_LietKeBanDocNoSach
 as
-select *
-from BanDoc
-where MaThe in (select distinct MaThe
-from MuonSach
-where NgayTra = '')
+select * from BanDoc where MaThe in (select distinct MaThe from MuonSach where NgayTra = '')
 
 /*Kiểm tra
 exec usp_LietKeBanDocNoSach
@@ -614,11 +565,7 @@ go
 create proc usp_LietKeSach_BanDocDaMuon
 	@MaThe char(6)
 as
-select *
-from Sach
-where MaSach in (select distinct MaSach
-from MuonSach
-where @MaThe = MaThe)
+select * from Sach where MaSach in (select distinct MaSach from MuonSach where @MaThe = MaThe)
 
 /*Kiểm tra
 exec usp_LietKeSach_BanDocDaMuon '050002'
@@ -627,10 +574,7 @@ go
 --------------------------------CÂU 8: VIẾT THỦ TỤC LẬP DANH SÁCH CÁC QUYỂN SÁCH CHƯA ĐƯỢC MƯỢN----------------------------------
 create proc usp_LietKeSach_ChuaMuon
 as
-select *
-from Sach
-where MaSach not in (select distinct MaSach
-from MuonSach)
+select * from Sach where MaSach not in (select distinct MaSach from MuonSach)
 
 /*Kiểm tra
 exec usp_LietKeSach_ChuaMuon
