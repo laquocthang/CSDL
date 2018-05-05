@@ -1,6 +1,6 @@
 /*-----------------------------------------------
 Bài lab: Quản lý học viên
-Ngày thực hiện: 20/4/2018
+Ngày thực hiện: 4/5/2018
 Người thực hiện: La Quốc Thắng
 MSSV:1610207
 ------------------------------------------------*/
@@ -70,6 +70,7 @@ go
 
 --RB1: Giờ kết thúc của một ca học không được trước giờ bắt đầu của ca học đó
 drop trigger tr_GioBD_GioKT
+go
 create trigger tr_GioBD_GioKT
 on CaHoc for insert, update
 as
@@ -91,23 +92,26 @@ go
 
 --RB2: Sĩ số học viên của một lớp học (SoHV) không quá 30 học viên và đúng bằng số học viên của lớp đó
 --Hàm đếm số học viên hiện có trong 1 lớp
+drop function fn_Dem_SiSo
 create function fn_Dem_SiSo (@MaLop char(4)) returns int
 as
 	begin
-	declare @count int
-	set @count = (select count(MSHV) from HocVien where MaLop=@MaLop)
-	return @count
-end
+		declare @count int
+		set @count = 0
+		set @count = (select count(MSHV) from HocVien where MaLop=@MaLop)
+		return @count
+	end
 
 /*Kiểm tra
 print dbo.fn_Dem_SiSo('A075')
 */
 go
 
+drop trigger tg_SiSo
 create trigger tg_SiSo
 on Lop for insert, update
 as
-if update(SoHV)
+if update(SoHV) or UPDATE(MaLop)
 	if exists (select * from inserted where SoHV>30 or SoHV<>dbo.fn_Dem_SiSo(MaLop))
 		begin
 			raiserror (N'Sĩ số của một lớp không được quá 30 và phải bằng số học viên của lớp',15,1)
@@ -118,6 +122,68 @@ if update(SoHV)
 update Lop
 set SoHV = 4
 where MaLop = 'A075'
+
+update Lop
+set SoHV = 31
+where MaLop = 'A075'
+
+*/
+
+create trigger tg_SiSo2
+on HocVien for delete
+as
+if exists (select * from deleted)
+	begin
+		declare @MaLop char(4)
+		set @MaLop = (select MaLop from deleted)
+		update Lop
+		set SoHV = SoHV - 1
+		where MaLop = @MaLop
+	end
+go
+
+create trigger tg_SiSo3
+on HocVien for insert
+as
+if UPDATE (MaLop)
+	if exists(select * from inserted)
+		begin
+			declare @MaLop char(4)
+			set @MaLop = (select MaLop from inserted)
+			update Lop
+			set SoHV = SoHV + 1
+			where MaLop = @MaLop
+		end
+
+drop trigger tg_SiSo4
+create trigger tg_SiSo4
+on HocVien for update
+as
+if UPDATE (MaLop)
+	if exists(select * from inserted)
+		begin
+			declare @MaLopMoi char(4)
+			declare @MaLopCu char(4)
+			set @MaLopCu = (select MaLop from deleted)
+			set @MaLopMoi = (select MaLop from inserted)
+			update Lop
+			set SoHV = SoHV + 1
+			where MaLop = @MaLopMoi
+			update Lop
+			set SoHV = SoHV - 1
+			where MaLop = @MaLopCu
+		end
+
+/*Kiểm tra
+update HocVien
+set MaLop = 'E114'
+where MSHV = '0003'
+
+exec usp_ThemHocVien '0008',N'Nguyễn Ngọc',N'Khoa','12/05/1986',N'Nữ','W123'
+exec usp_XoaHocVien '0008'
+
+select * from Lop
+select * from HocVien
 */
 go
 
@@ -193,8 +259,7 @@ as
 		if dbo.fn_SoTienHocPhi_HocVien(@MSHV)=@soTien
 			set @result=1		--Đã đóng đủ
 		else 
-			set @result=0
-		--Chưa đóng đủ
+			set @result=0 		--Chưa đóng đủ
 		return @result
 	end
 
@@ -245,6 +310,7 @@ go
 ------------------------CÂU 5: XÂY DỰNG CÁC THỦ TỤC------------------------
 
 --Thủ tục thêm một học viên
+drop proc usp_ThemHocVien
 create proc usp_ThemHocVien
 	@MSHV char(4),
 	@Ho nvarchar(20),
@@ -256,12 +322,7 @@ as
 if exists (select * from HocVien where MSHV = @MSHV)
 	print N'Đã tồn tại học viên này trong CSDL'
 else
-	begin
-		insert into HocVien values (@MSHV, @Ho, @Ten, @NgaySinh, @Phai, @MaLop)
-		update Lop
-		set SoHV = SoHV+1
-		where MaLop = @MaLop
-	end
+	insert into HocVien values (@MSHV, @Ho, @Ten, @NgaySinh, @Phai, @MaLop)
 go
 
 --Thủ tục cập nhật thông tin của một học viên cho trước
@@ -285,15 +346,22 @@ else
 go
 
 --Xóa một học viên cho trước
+drop proc usp_XoaHocVien
 create proc usp_XoaHocVien
 	@MSHV char(4)
 as
 if exists (select * from HocVien where MSHV = @MSHV)	
 	begin
+		delete from HocPhi
+		where MSHV = @MSHV
 		delete from HocVien
 		where MSHV = @MSHV
 	end
 else print N'Không tìm thấy học viên này để xóa'
+
+/*Kiểm tra
+exec usp_XoaHocVien '0007'
+*/
 go
 
 --Thêm một lớp học
