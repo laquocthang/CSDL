@@ -21,41 +21,49 @@
 ----------------------------------------------------------------
 	 
 --TẠO CƠ SỞ DỮ LIỆU VÀ CÁC BẢNG
-create database ....
+create database De1
 go
-use ...
+
+use De1
 go
+
+create table ChuyenNganh
+(MSCN char(2) primary key,
+TenCN nvarchar(30)
+)
+go
+
+create table CongViec
+(MSCV char(2) primary key,
+TenCV nvarchar(30)
+)
+go
+
 create table SinhVien
-(MSSV char(7),
+(MSSV char(7) primary key,
 TenSV nvarchar(30),
 Lop char(3)
 )
 go
-create table ChuyenNganh
-(MSCN char(2),
-TenCN nvarchar(30)
-)
-go
-create table CongViec
-(MSCV char(2),
-TenCV nvarchar(30)
-)
-go
-create table ThucHienDeTai
-(
-MSSV char(7),
-MSDT char(6),
-MSCV char(2) ,
-Diem tinyint
-)
-go
+
 create table DeTai
-(MSDT char(6),
+(MSDT char(6) primary key,
 TenDT nvarchar(50),
-MSCN char(2) ,
+MSCN char(2) references ChuyenNganh(MSCN),
 NgayBatDau Datetime,
 NgayNghiemThu Datetime
 )
+go
+
+create table ThucHienDeTai
+(
+MSSV char(7) references SinhVien(MSSV),
+MSDT char(6) references DeTai(MSDT),
+MSCV char(2) references CongViec(MSCV),
+Diem tinyint
+constraint PK primary key (MSSV, MSDT)
+)
+go
 
 ---------NHẬP DỮ LIỆU CHO CÁC BẢNG-----------
 --------------------
@@ -94,5 +102,96 @@ insert into ThucHienDeTai values('0400023', 'DT0605', 'C4', 8)
 insert into ThucHienDeTai values('0400100', 'DT0603', 'C3', 8)
 insert into ThucHienDeTai values('0310100', 'DT0604', 'C4', 6)
 insert into ThucHienDeTai values('0310100', 'DT0601', 'C2', 5)
--------------TRUY VẤN DỮ LIỆU-------------
 
+select * from ChuyenNganh
+
+select * from CongViec
+
+select * from DeTai
+
+select * from SinhVien
+
+select * from ThucHienDeTai
+-------------TRUY VẤN DỮ LIỆU-------------
+---a) Cho biết những đề tài (MSDT, TenDT) thuộc chuyên ngành ‘Hệ thống thông tin’.
+select MSDT, TenDT
+from ChuyenNganh c, DeTai d
+where c.MSCN=d.MSCN and TenCN like N'Hệ thống thông tin'
+go
+
+---b) Lập danh sách các đề tài thuộc chuyên ngành 'Đồ họa', thông tin cần hiển thị bao gồm: MSDT, TenDT, Số sinh viên tham gia.
+select d.MSDT, TenDT, count(MSSV) as N'Số SV tham gia'
+from DeTai d, ChuyenNganh c, ThucHienDeTai t
+where d.MSCN=c.MSCN and d.MSDT=t.MSDT and TenCN like N'Đồ họa'
+group by d.MSDT, TenDT
+go
+
+---c) Cho biết thông tin của đề tài có nhiều sinh viên tham gia nhất.
+select d.MSDT, TenDT, MSCN, NgayBatDau, NgayNghiemThu, count(MSSV) as N'Số SV tham gia'
+from DeTai d, ThucHienDeTai t
+where d.MSDT=t.MSDT
+group by d.MSDT, TenDT, MSCN, NgayBatDau, NgayNghiemThu
+having count(MSSV)>=all(select count(MSSV)
+						from DeTai d, ThucHienDeTai t
+						where d.MSDT=t.MSDT
+						group by d.MSDT)
+go
+
+---d) Cho biết thông tin (MSDT, TenDT, TenCN) của đề tài chưa có sinh viên tham gia.
+select d.MSDT, TenDT, MSCN, NgayBatDau, NgayNghiemThu, count(MSSV) as N'Số SV tham gia'
+from DeTai d, ThucHienDeTai t
+where d.MSDT=t.MSDT
+group by d.MSDT, TenDT, MSCN, NgayBatDau, NgayNghiemThu
+having count(MSSV)=0
+go
+
+---e) Cho biết số đề tài của từng chuyên ngành, thông tin cần hiển thị bao gồm MACN, TenCN, số đề tài.
+select c.MSCN,TenCN,count(MSDT) as N'Số đề tài'
+from DeTai d, ChuyenNganh c
+where d.MSCN=c.MSCN
+group by c.MSCN, TenCN
+go
+
+---f) Cho biết tên các sinh viên không làm đề tài "Quản lý siêu thị".
+select *
+from SinhVien
+where MSSV not in (select s.MSSV
+					from SinhVien s, ThucHienDeTai t, DeTai d
+					where s.MSSV=t.MSSV and t.MSDT=d.MSDT and TenDT like N'Quản lý siêu thị')
+go
+
+---g) Cho biết số đề tài mà mỗi sinh viên tham gia thực hiện.
+select s.MSSV, TenSV, count(MSDT) as N'Số đề tài thực hiện'
+from SinhVien s, ThucHienDeTai t
+where s.MSSV=t.MSSV
+group by s.MSSV, TenSV
+go
+
+---h) Cho biết chuyên ngành (MSCN, TENCN) không có đề tài. 
+select *
+from ChuyenNganh
+where MSCN not in (select c.MSCN
+					from DeTai d, ChuyenNganh c
+					where d.MSCN=c.MSCN
+					group by c.MSCN
+)
+go
+
+---i) Cho biết tên những sinh viên thực hiện nhiều đề tài nhất.
+select s.MSSV, TenSV, Lop, count(MSDT) as N'Số đề tài thực hiện'
+from SinhVien s, ThucHienDeTai t
+where s.MSSV=t.MSSV
+group by s.MSSV, TenSV, Lop
+having count(MSDT) >= all(select count(MSDT)
+						from SinhVien s, ThucHienDeTai t
+						where s.MSSV=t.MSSV
+						group by s.MSSV)
+go
+
+---j) Cho biết sinh viên tham gia tất cả các đề tài, thông tin cần hiển thị gồm: MSSV, TenSV,Lop
+select s.MSSV, TenSV, Lop
+from SinhVien s, ThucHienDeTai t
+where s.MSSV=t.MSSV
+group by s.MSSV, TenSV, Lop
+having count(MSDT)=(select count(MSDT) from DeTai)
+go
