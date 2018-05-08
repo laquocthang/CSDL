@@ -1,1 +1,6 @@
-
+#Microsoft Office
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.accdb
