@@ -132,3 +132,6 @@ from SinhVien
 
 select *
 from BANGDIEM
+
+-- 23) Thống kê số lượng sinh viên ở mỗi tỉnh theo mẫu sau:
+-- MSTinh -  Tên Tỉnh - Số SV Nam - Số SV Nữ - Tổng cộngselect t.MSTinh, t.TenTinh, 	(		select COUNT(*)		from SinhVien		where Phai = 1 and MSTinh = t.MSTinh	) as 'SoSVNam',	(		select COUNT(*)		from SinhVien		where Phai = 0 and MSTinh = t.MSTinh	) as 'SoSVNu',	COUNT(*) as 'TongCong'from Tinh t, SinhVien svwhere t.MSTinh = sv.MSTinhgroup by t.MSTinh, t.TenTinh
